@@ -3,10 +3,10 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2" apply false
 }
 
-group 'ru.otus'
-version '1.0-SNAPSHOT'
+
 
 allprojects {
+    group 'ru.otus'
     repositories {
         mavenCentral()
     }

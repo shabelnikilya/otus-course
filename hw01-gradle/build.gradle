@@ -6,9 +6,6 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-group 'ru.otus'
-version '1.0-SNAPSHOT'
-
 dependencies {
     implementation "com.google.guava:guava"
 }
