@@ -14,6 +14,6 @@ public class CustomerReverseOrder {
     }
 
     public Customer take() {
-        return customers.isEmpty() ? null : customers.pop();
+        return customers.pop();
     }
 }
