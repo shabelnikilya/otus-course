@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * После метода с аннотацией @Test.
+ * До метода с аннотацией @Test.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
