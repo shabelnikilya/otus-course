@@ -20,49 +20,40 @@ public class TestRunner {
     /**
      * Запуск тестов.
      *
-     * @param ta класс, который надо оттестировать.
+     * @param clazz тестируемый класс.
      */
-    public static void runTest(TestAnnotation ta) throws ReflectiveOperationException {
+    public static <T> void runTest(Class<T> clazz) throws ReflectiveOperationException {
         List<Message> messages = new ArrayList<>();
-        invokeAllMethods(messages, ta, 2, 0);
+        invokeAllMethods(messages, clazz);
         messages.forEach(Message::showMessage);
         showStatisticTest(messages);
     }
 
     /**
-     * Метод для выполнения всех методов вместе, класса {@link TestAnnotation}.
+     * Метод для выполнения всех методов вместе.
      */
-    private static void invokeAllMethods(List<Message> messages, TestAnnotation ta, Object... args)
+    private static <T> void invokeAllMethods(List<Message> messages, Class<T> clazz)
                                                                                 throws ReflectiveOperationException {
         boolean isError;
-        List<Method> methodsBefore = getMethodsBeforeAndAfterAnnotation(ta, Before.class);
-        List<Method> methodsAfter = getMethodsBeforeAndAfterAnnotation(ta, After.class);
-        List<Method> methodsTest = getMethodsBeforeAndAfterAnnotation(ta, Test.class);
+        List<Method> methodsBefore = getMethodsBeforeAndAfterAnnotation(clazz, Before.class);
+        List<Method> methodsAfter = getMethodsBeforeAndAfterAnnotation(clazz, After.class);
+        List<Method> methodsTest = getMethodsBeforeAndAfterAnnotation(clazz, Test.class);
         for (Method m : methodsTest) {
-            TestAnnotation testAnnotation = newTestAnnotation(ta);
-            invokeAfterAndBeforeMethods(methodsBefore, testAnnotation);
-            isError = invokeTestMethods(testAnnotation, m, args);
-            messages.add(new Message(ta.getClass(), m, isError));
-            invokeAfterAndBeforeMethods(methodsAfter, testAnnotation);
+            T testClass = clazz.getDeclaredConstructor().newInstance();
+            invokeAfterAndBeforeMethods(methodsBefore, testClass);
+            isError = invokeTestMethods(testClass, m);
+            messages.add(new Message(clazz, m, isError));
+            invokeAfterAndBeforeMethods(methodsAfter, testClass);
         }
-    }
-
-    /**
-     * Получение нового экземпляра {@link TestAnnotation}.
-     */
-    private static TestAnnotation newTestAnnotation(TestAnnotation ta) throws ReflectiveOperationException {
-        Class<?> clazz = Class.forName(ta.getClass().getName());
-        return (TestAnnotation) clazz.getDeclaredConstructor().newInstance();
     }
 
     /**
      * Выполнение методов помеченных аннотацией @Test и получение информации об успешности теста.
      */
-    private static boolean invokeTestMethods(TestAnnotation testAnnotation, Method method, Object[] args)
-                                                                                throws ReflectiveOperationException {
+    private static <T> boolean invokeTestMethods(T testClass, Method method) throws ReflectiveOperationException {
         boolean isError = false;
         try {
-            method.invoke(testAnnotation, args);
+            method.invoke(testClass);
         } catch (InvocationTargetException e) {
             isError = true;
             boolean matcherException = e.getCause() instanceof TestAnnotationException;
@@ -76,19 +67,19 @@ public class TestRunner {
     /**
      * Метод для выполнения методов с аннотациями @Before и @After класса {@link TestAnnotation}.
      */
-    private static void invokeAfterAndBeforeMethods(List<Method> methods, TestAnnotation testAnnotation)
+    private static <T> void invokeAfterAndBeforeMethods(List<Method> methods, T testClass)
                                                             throws InvocationTargetException, IllegalAccessException {
         for (Method m : methods) {
-            m.invoke(testAnnotation);
+            m.invoke(testClass);
         }
     }
 
     /**
      * Метод для получения методов помеченных аннотациями: {@link Before}, {@link After}.
      */
-    private static List<Method> getMethodsBeforeAndAfterAnnotation(TestAnnotation ta,
+    private static <T> List<Method> getMethodsBeforeAndAfterAnnotation(Class<T> ta,
                                                                    Class<? extends Annotation> clazz) {
-        Method[] methods = ta.getClass().getDeclaredMethods();
+        Method[] methods = ta.getDeclaredMethods();
         List<Method> methodList = new ArrayList<>();
         for (Method m : methods) {
             Annotation t = m.getAnnotation(clazz);

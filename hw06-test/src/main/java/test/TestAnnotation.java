@@ -10,8 +10,12 @@ import exception.TestAnnotationException;
  */
 public class TestAnnotation {
 
+    private int a = 1;
+
+    private int b = 1;
+
     public TestAnnotation() {
-        System.out.println("Новый класс!");
+        System.out.println("Инициализация нового объекта!!!");
     }
 
     @Before
@@ -20,7 +24,7 @@ public class TestAnnotation {
     }
 
     @Test
-    public int sum(int a, int b) throws IllegalAccessException {
+    public int sum() throws IllegalAccessException {
         System.out.println("Метод с аннатацией @Test");
         if (a > 0) {
             throw new IllegalAccessException();
@@ -32,7 +36,7 @@ public class TestAnnotation {
      * Исключение для имитации не прохождение теста.
      */
     @Test
-    public int div(int a, int b) throws TestAnnotationException {
+    public int div() throws TestAnnotationException {
         System.out.println("Метод с аннатацией @Test");
         if (b == 0) {
             throw new TestAnnotationException("Тест метода div не пройден!");
@@ -41,7 +45,7 @@ public class TestAnnotation {
     }
 
     @Test
-    public int diff(int a, int b) {
+    public int diff() {
         System.out.println("Метод с аннатацией @Test");
         return a - b;
     }
