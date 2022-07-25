@@ -77,12 +77,12 @@ public class TestRunner {
     /**
      * Метод для получения методов помеченных аннотациями: {@link Before}, {@link After}.
      */
-    private static <T> List<Method> getMethodsBeforeAndAfterAnnotation(Class<T> ta,
-                                                                   Class<? extends Annotation> clazz) {
-        Method[] methods = ta.getDeclaredMethods();
+    private static <T> List<Method> getMethodsBeforeAndAfterAnnotation(Class<T> clazz,
+                                                                   Class<? extends Annotation> annotationClass) {
+        Method[] methods = clazz.getDeclaredMethods();
         List<Method> methodList = new ArrayList<>();
         for (Method m : methods) {
-            Annotation t = m.getAnnotation(clazz);
+            Annotation t = m.getAnnotation(annotationClass);
             if (Objects.nonNull(t)) {
                 methodList.add(m);
             }
