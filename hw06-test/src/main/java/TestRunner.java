@@ -19,29 +19,12 @@ public class TestRunner {
 
     /**
      * Запуск тестов.
+     *
+     * @param ta класс, который надо оттестировать.
      */
-    public static void main(String[] args) throws ReflectiveOperationException {
-        TestAnnotation testAnnotation = new TestAnnotation();
-        testResultIncorrect(testAnnotation);
-        testResultCorrect(testAnnotation);
-    }
-
-    /**
-     * Тест с не корректными аргументами.
-     */
-    private static void testResultIncorrect(TestAnnotation ta) throws ReflectiveOperationException {
+    public static void runTest(TestAnnotation ta) throws ReflectiveOperationException {
         List<Message> messages = new ArrayList<>();
         invokeAllMethods(messages, ta, 2, 0);
-        messages.forEach(Message::showMessage);
-        showStatisticTest(messages);
-    }
-
-    /**
-     * Тест с корректными аргументами.
-     */
-    private static void testResultCorrect(TestAnnotation ta) throws ReflectiveOperationException {
-        List<Message> messages = new ArrayList<>();
-        invokeAllMethods(messages, ta, 2, 1);
         messages.forEach(Message::showMessage);
         showStatisticTest(messages);
     }
@@ -84,7 +67,7 @@ public class TestRunner {
             isError = true;
             boolean matcherException = e.getCause() instanceof TestAnnotationException;
             if (!matcherException) {
-                e.printStackTrace();
+                e.getCause().printStackTrace();
             }
         }
         return isError;

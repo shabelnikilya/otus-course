@@ -33,11 +33,10 @@ public class TestAnnotation {
      */
     @Test
     public int div(int a, int b) throws TestAnnotationException {
+        System.out.println("Метод с аннатацией @Test");
         if (b == 0) {
-            System.out.println("Метод с аннатацией @Test");
             throw new TestAnnotationException("Тест метода div не пройден!");
         }
-        System.out.println("Метод с аннатацией @Test");
         return a / b;
     }
 
