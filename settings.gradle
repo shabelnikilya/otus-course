@@ -2,4 +2,5 @@ rootProject.name = 'java_course'
 include 'hw01-gradle'
 include 'hw04-generics'
 include 'hw06-test'
+include 'hw08-gc'
 
