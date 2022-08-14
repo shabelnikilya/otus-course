@@ -2,21 +2,24 @@ package logging;
 
 import logging.log.TestLogging;
 import logging.log.TestLoggingImpl;
-import logging.test.Test;
-import logging.test.TestClassWithProxy;
-import logging.test.TestClassWithoutProxy;
+import logging.proxy.LogHandler;
+import logging.proxy.LogReflection;
+import logging.test.TestClass;
+
+import java.lang.reflect.InvocationHandler;
 
 public class Main {
     public static void main(String[] args) {
         TestLogging testLogging = new TestLoggingImpl();
+        InvocationHandler invocationHandler = new LogHandler(testLogging);
 
-        Test testClassWithoutProxy = new TestClassWithoutProxy(testLogging);
-        Test testClassWithProxy = new TestClassWithProxy(testLogging);
+        TestClass testClass = new TestClass(testLogging);
+        TestClass testClassProxy = new TestClass(LogReflection.createProxyClass(testLogging, invocationHandler));
 
         System.out.println("Методы без добавления логирования параметров методов:");
-        testClassWithoutProxy.action();
+        testClass.action();
         System.out.println("-----------------------------------");
         System.out.println("Методы с добавлением логирования параметров методов:");
-        testClassWithProxy.action();
+        testClassProxy.action();
     }
 }

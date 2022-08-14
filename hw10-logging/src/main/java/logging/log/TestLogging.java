@@ -2,13 +2,13 @@ package logging.log;
 
 
 public interface TestLogging {
-    void showParams();
 
-    void showParams(int first, int second);
+    void calculation();
 
-    void showParams(int first, int second, int third);
+    void calculation(int first);
 
-    int randomNumberInPeriod(int startPeriod, int endPeriod);
+    void calculation(int first, int second);
 
-    void notHaveAnnotation();
+    void calculation(int first, int second, int third);
+
 }

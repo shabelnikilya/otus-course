@@ -1,17 +1,19 @@
 package logging.proxy;
 
 import logging.exception.MissingInterfaceException;
+import logging.log.TestLogging;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 
 public class LogReflection {
 
-    public static Object createProxyClass(Object object) {
-        Class<?> clazz = object.getClass();
+    public static TestLogging createProxyClass(TestLogging testLogging, InvocationHandler invocationHandler) {
+        Class<?> clazz = testLogging.getClass();
         Class<?>[] interfaces = clazz.getInterfaces();
         if (interfaces.length == 0) {
             throw new MissingInterfaceException("Класс на основе которого создается proxy не реализует интерфейсы!");
         }
-        return Proxy.newProxyInstance(clazz.getClassLoader(), interfaces, new LogHandler(object));
+        return (TestLogging) Proxy.newProxyInstance(clazz.getClassLoader(), interfaces, invocationHandler);
     }
 }
