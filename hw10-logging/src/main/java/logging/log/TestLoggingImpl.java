@@ -26,4 +26,10 @@ public class TestLoggingImpl implements TestLogging {
     public void calculation(int first, int second, int third) {
         System.out.println("Перегруженный метод с тремя параметрами: " + first + ", " + second + ", " + third);
     }
+
+    @Log
+    @Override
+    public void calculation(int first, int second, long third) {
+        System.out.println("Перегруженный метод с тремя параметрами: " + first + ", " + second + ", " + third);
+    }
 }

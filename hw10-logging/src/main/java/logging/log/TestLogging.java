@@ -11,4 +11,6 @@ public interface TestLogging {
 
     void calculation(int first, int second, int third);
 
+    void calculation(int first, int second, long third);
+
 }

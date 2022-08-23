@@ -2,6 +2,7 @@ package logging.proxy;
 
 import logging.annotation.Log;
 import logging.log.TestLogging;
+import logging.proxy.meta.MetadataMethod;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
@@ -9,13 +10,16 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class LogHandler implements InvocationHandler {
+    private final static Class<Log> LOG_ANNOTATION = Log.class;
 
     private final TestLogging proxyObject;
 
-    private final Map<Class<?>, List<Method>> logMethods = new HashMap<>();
+    private final Set<MetadataMethod> logMethods = new HashSet<>();
 
     public LogHandler(TestLogging proxyObject) {
+        validateObject(proxyObject);
         this.proxyObject = proxyObject;
+        loadLogMethods(proxyObject);
     }
 
     @Override
@@ -24,9 +28,8 @@ public class LogHandler implements InvocationHandler {
         if (argsLength == 0) {
             return method.invoke(proxyObject, args);
         }
-        putLogMethod();
-        Method m = getOriginalMethod(method, argsLength);
-        if (m != null) {
+        MetadataMethod metadataMethod = MetadataMethod.of(method.getName(), Arrays.asList(method.getParameterTypes()));
+        if (logMethods.contains(metadataMethod)) {
             Arrays.asList(args).forEach(
                     arg -> System.out.println("Executed method: " + method.getName() + ", param: " + arg)
             );
@@ -34,28 +37,19 @@ public class LogHandler implements InvocationHandler {
         return method.invoke(proxyObject, args);
     }
 
-    private Method getOriginalMethod(Method method, int argsLength) {
-        List<Method> methodsClass = logMethods.get(proxyObject.getClass());
-        for (Method m : methodsClass) {
-            int mLength = m.getParameterCount();
-            if (m.getName().equals(method.getName()) && mLength == argsLength) {
-                return m;
-            }
+    private static void validateObject(TestLogging proxyObject) {
+        if (proxyObject == null) {
+            throw new IllegalArgumentException("Класс, на основе которого строится proxy объект не может быть null!");
         }
-        return null;
     }
 
-    private void putLogMethod() {
-        if (!logMethods.containsKey(proxyObject.getClass())) {
-            Method[] methods = proxyObject.getClass().getDeclaredMethods();
-            List<Method> methodsWithLogAnnotation = new ArrayList<>();
-            for (Method method : methods) {
-                Annotation annotation = method.getAnnotation(Log.class);
-                if (annotation != null) {
-                    methodsWithLogAnnotation.add(method);
-                }
+    private void loadLogMethods(TestLogging proxyObject) {
+        Method[] methods = proxyObject.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            Annotation annotation = method.getAnnotation(LOG_ANNOTATION);
+            if (annotation != null) {
+                logMethods.add(MetadataMethod.of(method.getName(), Arrays.asList(method.getParameterTypes())));
             }
-            logMethods.put(proxyObject.getClass(), methodsWithLogAnnotation);
         }
     }
 }

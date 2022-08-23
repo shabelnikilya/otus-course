@@ -14,5 +14,6 @@ public class TestClass {
         logging.calculation(100);
         logging.calculation(1, 2);
         logging.calculation(10, 20, 30);
+        logging.calculation(10, 20, 3_000_000L);
     }
 }
