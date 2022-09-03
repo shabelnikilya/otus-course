@@ -1,8 +1,5 @@
 package ru.otus.models;
 
-/**
- * @author Shabelnik Ilya (ishabelnik@unislabs.com)
- */
 public class NodeRuble extends Node {
     private PairRubleAmount value;
 
