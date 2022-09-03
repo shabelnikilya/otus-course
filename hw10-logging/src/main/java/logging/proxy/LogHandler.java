@@ -26,6 +26,7 @@ public class LogHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         int argsLength = args == null ? 0 : args.length;
         if (argsLength == 0) {
+            System.out.println("Executed method: " + method.getName() + ", no params");
             return method.invoke(proxyObject, args);
         }
         MetadataMethod metadataMethod = MetadataMethod.of(method.getName(), Arrays.asList(method.getParameterTypes()));
