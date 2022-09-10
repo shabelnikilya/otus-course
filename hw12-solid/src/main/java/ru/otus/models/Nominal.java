@@ -3,7 +3,7 @@ package ru.otus.models;
 /**
  * Купюры.
  */
-public enum Ruble {
+public enum Nominal {
     ONE(1),
     FIVE(5),
     TEN(10),
@@ -16,7 +16,7 @@ public enum Ruble {
 
     private final int value;
 
-    Ruble(int value) {
+    Nominal(int value) {
         this.value = value;
     }
 
