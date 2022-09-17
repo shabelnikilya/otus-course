@@ -28,11 +28,13 @@ public class HomeWork {
 
     public static void main(String[] args) {
         Message message = new Message.Builder(1L)
+                .field10("10")
                 .field11("11")
                 .field12("12")
                 .build();
 
-        List<Processor> processorList = List.of(new LoggerProcessor(new ProcessorChangePlaceField()));
+        Processor processor = new LoggerProcessor(new ProcessorChangePlaceField());
+        List<Processor> processorList = List.of(processor);
         Listener listenerPrintConsole = new ListenerPrinterConsole();
 
         Handler handler = new ComplexProcessor(processorList, c -> {});

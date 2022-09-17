@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-
 class ProcessorTimeExceptionTest {
     private static final String MESSAGE_EXCEPTION = "Ошика в каждую четную секунда!";
 
@@ -41,7 +40,9 @@ class ProcessorTimeExceptionTest {
 
         );
 
-        assertThatExceptionOfType(TestException.class).isThrownBy(() -> processor.process(message));
+        assertThatExceptionOfType(TestException.class)
+                .isThrownBy(() -> processor.process(message))
+                .withMessage(MESSAGE_EXCEPTION);
     }
 
     private static class TestException extends RuntimeException {

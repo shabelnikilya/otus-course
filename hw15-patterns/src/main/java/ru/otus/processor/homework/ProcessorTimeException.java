@@ -6,14 +6,12 @@ import ru.otus.processor.Processor;
 import java.util.function.Supplier;
 
 public class ProcessorTimeException implements Processor {
-    private DateTimeProvider dateTimeProvider;
+    private final DateTimeProvider dateTimeProvider;
+    private final Supplier<RuntimeException> runtimeExceptionSupplier;
 
-    private Supplier<RuntimeException> runtimeExceptionSupplier;
-    private Exception exception;
-
-    public ProcessorTimeException(DateTimeProvider dateTimeProvider, Supplier<RuntimeException> exceptionConsumer) {
+    public ProcessorTimeException(DateTimeProvider dateTimeProvider, Supplier<RuntimeException> runtimeExceptionSupplier) {
         this.dateTimeProvider = dateTimeProvider;
-        this.runtimeExceptionSupplier = exceptionConsumer;
+        this.runtimeExceptionSupplier = runtimeExceptionSupplier;
     }
 
     @Override
