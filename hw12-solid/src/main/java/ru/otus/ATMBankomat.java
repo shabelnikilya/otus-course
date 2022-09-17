@@ -1,7 +1,7 @@
 package ru.otus;
 
 import ru.otus.models.Nominal;
-import ru.otus.store.Store;
+import ru.otus.store.StoreBanknotes;
 
 import java.util.List;
 
@@ -9,9 +9,9 @@ import java.util.List;
  * Банкомат.
  */
 public class ATMBankomat {
-    private final Store<Nominal> store;
+    private final StoreBanknotes<Nominal> store;
 
-    public ATMBankomat(Store<Nominal> store) {
+    public ATMBankomat(StoreBanknotes<Nominal> store) {
         this.store = store;
     }
 

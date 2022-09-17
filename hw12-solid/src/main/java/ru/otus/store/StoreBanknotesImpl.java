@@ -10,14 +10,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class StoreNominalImpl implements Store<Nominal> {
+public class StoreBanknotesImpl implements StoreBanknotes<Nominal> {
     private final Algorithm<Nominal, PairNominalAmount> algorithm;
-
     private final List<PairNominalAmount> pairNominalAmounts = new ArrayList<>();
 
-    public StoreNominalImpl(Algorithm<Nominal, PairNominalAmount> algorithm) {
+    public StoreBanknotesImpl(Algorithm<Nominal, PairNominalAmount> algorithm) {
         this.algorithm = algorithm;
         initNominalValues();
+    }
+
+    private void initNominalValues() {
+        List<PairNominalAmount> pairNominalAmounts = Arrays.stream(Nominal.values())
+                .map(PairNominalAmount::of)
+                .sorted((p1, p2) -> p2.getNominalValue() - p1.getNominalValue())
+                .collect(Collectors.toList());
+        this.pairNominalAmounts.addAll(pairNominalAmounts);
     }
 
     @Override
@@ -33,10 +40,14 @@ public class StoreNominalImpl implements Store<Nominal> {
 
     @Override
     public List<Nominal> giveBanknotes(long value) {
+        validateValueLessBalance(value);
+        return new ArrayList<>(algorithm.calculationBanknotes(value, pairNominalAmounts));
+    }
+
+    private void validateValueLessBalance(long value) {
         if (balance() < value) {
             throw new NotHaveMoneyException("Данного количества денег в АТМ нету!");
         }
-        return new ArrayList<>(algorithm.calculationBanknotes(value, pairNominalAmounts));
     }
 
     @Override
@@ -48,12 +59,5 @@ public class StoreNominalImpl implements Store<Nominal> {
         return result;
     }
 
-    private void initNominalValues() {
-        Nominal[] nominalValues = Nominal.values();
-        Arrays.sort(nominalValues, (r1, r2) -> Integer.compare(r2.getValue(), r1.getValue()));
-        List<PairNominalAmount> pairNominalAmounts = Arrays.stream(nominalValues)
-                .map(PairNominalAmount::of)
-                .collect(Collectors.toList());
-        this.pairNominalAmounts.addAll(pairNominalAmounts);
-    }
+
 }

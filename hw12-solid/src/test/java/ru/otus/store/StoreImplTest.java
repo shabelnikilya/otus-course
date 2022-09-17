@@ -19,7 +19,7 @@ class StoreImplTest {
 
     @BeforeEach
     void init() {
-        Store<Nominal> nominalStore = new StoreNominalImpl(new AlgorithmNominalImpl());
+        StoreBanknotes<Nominal> nominalStore = new StoreBanknotesImpl(new AlgorithmNominalImpl());
         atmBankomat = new ATMBankomat(nominalStore);
     }
 

@@ -15,6 +15,10 @@ public class PairNominalAmount extends Amount {
         return nominal;
     }
 
+    public int getNominalValue() {
+        return nominal.getValue();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

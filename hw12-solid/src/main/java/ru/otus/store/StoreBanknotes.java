@@ -2,7 +2,7 @@ package ru.otus.store;
 
 import java.util.List;
 
-public interface Store<T> {
+public interface StoreBanknotes<T> {
 
     void add(List<T> moneys);
 

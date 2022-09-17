@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AlgorithmNominalImpl implements Algorithm<Nominal, PairNominalAmount> {
+
     @Override
     public List<Nominal> calculationBanknotes(long sum, List<PairNominalAmount> values) {
         List<Nominal> result = new ArrayList<>();
