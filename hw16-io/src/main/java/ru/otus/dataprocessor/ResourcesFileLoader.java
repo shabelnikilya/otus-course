@@ -1,7 +1,5 @@
 package ru.otus.dataprocessor;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import jakarta.json.*;
 import ru.otus.model.Measurement;
 
@@ -10,7 +8,6 @@ import java.util.stream.Collectors;
 
 public class ResourcesFileLoader implements Loader {
     private final String fileName;
-    private final Gson gson = new GsonBuilder().create();
 
     public ResourcesFileLoader(String fileName) {
         this.fileName = fileName;
@@ -20,7 +17,10 @@ public class ResourcesFileLoader implements Loader {
     public List<Measurement> load() {
         JsonArray jsonValues = getJsonArray();
         return jsonValues.stream()
-                .map(json -> gson.fromJson(json.toString(), Measurement.class))
+                .map(JsonValue::asJsonObject)
+                .map(json ->
+                        new Measurement(json.getString("name"), json.getJsonNumber("value").doubleValue())
+                )
                 .collect(Collectors.toList());
     }
 
