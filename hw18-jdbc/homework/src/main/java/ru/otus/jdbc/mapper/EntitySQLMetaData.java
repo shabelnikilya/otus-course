@@ -1,9 +1,10 @@
 package ru.otus.jdbc.mapper;
 
 /**
- * Создает SQL - запросы
+ * @author Shabelnik Ilya (ishabelnik@unislabs.com)
  */
 public interface EntitySQLMetaData {
+
     String getSelectAllSql();
 
     String getSelectByIdSql();
