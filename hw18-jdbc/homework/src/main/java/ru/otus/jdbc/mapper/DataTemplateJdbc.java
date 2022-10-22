@@ -4,18 +4,12 @@ import ru.otus.core.repository.DataTemplate;
 import ru.otus.core.repository.executor.DbExecutor;
 import ru.otus.jdbc.mapper.service.JdbcTypeService;
 import ru.otus.jdbc.mapper.service.JdbcTypeServiceImpl;
-import ru.otus.model.Client;
-import ru.otus.model.Manager;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.function.BiFunction;
 
-/**
- * @author Shabelnik Ilya (ishabelnik@unislabs.com)
- */
 /**
  * Сохратяет объект в базу, читает объект из базы
  */
@@ -75,12 +69,17 @@ public class DataTemplateJdbc<T> implements DataTemplate<T> {
 
     @Override
     public long insert(Connection connection, T client) {
-        List<Object> objects = jdbcTypeService.getParams(client.getClass()).apply(client);
+        List<Object> objects = getParams(client);
         return dbExecutor.executeStatement(connection, entitySQLMetaData.getInsertSql(), objects);
     }
 
     @Override
     public void update(Connection connection, T client) {
-        dbExecutor.executeStatement(connection, entitySQLMetaData.getUpdateSql(), List.of(client));
+        List<Object> objects = getParams(client);
+        dbExecutor.executeStatement(connection, entitySQLMetaData.getUpdateSql(), objects);
+    }
+
+    private List<Object> getParams(T client) {
+        return jdbcTypeService.getParams(client.getClass()).apply(client);
     }
 }

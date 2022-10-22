@@ -1,6 +1,7 @@
 package ru.otus.model;
 
 import ru.otus.jdbc.mapper.reflection.entity.annotation.Id;
+import ru.otus.jdbc.mapper.reflection.entity.annotation.InitEntity;
 
 public class Client {
     @Id
@@ -15,6 +16,7 @@ public class Client {
         this.name = name;
     }
 
+    @InitEntity
     public Client(Long id, String name) {
         this.id = id;
         this.name = name;

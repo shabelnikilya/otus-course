@@ -21,16 +21,21 @@ public class JdbcTypeServiceImpl implements JdbcTypeService {
         jdbcResults.put("Long", this::getLong);
         params.put(Client.class, c -> {
             Client client = (Client) c;
-            if (client.getName() != null) {
-                return List.of(client.getName());
+            List<Object> params = new ArrayList<>();
+            params.add(client.getName());
+            if (client.getId() != null) {
+                params.add(client.getId());
             }
-            return Collections.emptyList();
+            return params;
         });
         params.put(Manager.class, m -> {
             Manager manager = (Manager) m;
             List<Object> params = new ArrayList<>();
             params.add(manager.getLabel());
             params.add(manager.getParam1());
+            if (manager.getNo() != null) {
+                params.add(manager.getNo());
+            }
             return params;
         });
     }

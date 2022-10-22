@@ -8,9 +8,6 @@ import ru.otus.model.Manager;
 
 import java.lang.reflect.Field;
 
-/**
- * @author Shabelnik Ilya (ishabelnik@unislabs.com)
- */
 public class EntitySqlMetaDataImpl implements EntitySQLMetaData {
     private final EntityClassMetaData<?> metaData;
 
@@ -25,7 +22,7 @@ public class EntitySqlMetaDataImpl implements EntitySQLMetaData {
 
     @Override
     public String getSelectByIdSql() {
-        return String.format("select * from %s where %s = ?", metaData.getName(), metaData.getIdField().getName()); // todo NPE
+        return String.format("select * from %s where %s = ?", metaData.getName(), metaData.getIdField().getName());
     }
 
     @Override
@@ -53,19 +50,6 @@ public class EntitySqlMetaDataImpl implements EntitySQLMetaData {
             fields.append(String.format("%s = ?", field.getName()));
             delimiter = ", ";
         }
-
-
         return String.format("update %s set " + fields + " where %s = ?", metaData.getName(), metaData.getIdField().getName());
-    }
-
-    public static void main(String[] args) {
-        Client client = new Client("client");
-        for (Field f : new EntityClassMetaDataImpl<>(Client.class).getFieldsWithoutId()) {
-            System.out.println();
-        }
-//        for (Class c : new EntityClassMetaDataImpl<>(Manager.class).getConstructor().getParameterTypes()) {
-//            System.out.println(c.getT().toString());
-//        }
-        System.out.println(new EntitySqlMetaDataImpl(new EntityClassMetaDataImpl<>(Client.class)).getInsertSql());
     }
 }

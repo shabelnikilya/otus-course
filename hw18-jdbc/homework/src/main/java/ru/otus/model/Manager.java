@@ -1,6 +1,7 @@
 package ru.otus.model;
 
 import ru.otus.jdbc.mapper.reflection.entity.annotation.Id;
+import ru.otus.jdbc.mapper.reflection.entity.annotation.InitEntity;
 
 public class Manager {
     @Id
@@ -15,6 +16,7 @@ public class Manager {
         this.label = label;
     }
 
+    @InitEntity
     public Manager(Long no, String label, String param1) {
         this.no = no;
         this.label = label;

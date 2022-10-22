@@ -2,22 +2,71 @@ package ru.otus.jdbc.mapper.reflection.entity;
 
 import ru.otus.jdbc.mapper.EntityClassMetaData;
 import ru.otus.jdbc.mapper.reflection.entity.annotation.Id;
+import ru.otus.jdbc.mapper.reflection.entity.annotation.InitEntity;
+import ru.otus.jdbc.mapper.reflection.entity.exception.NotFoundIdFieldException;
+import ru.otus.jdbc.mapper.reflection.entity.exception.NotFoundInitConstructorException;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EntityClassMetaDataImpl<T> implements EntityClassMetaData<T> {
-    private T t;
 
     private final Class<T> clazz;
+    private final Constructor<T> constructor;
+    private final Field idField;
+    private final List<Field> allFields;
+    private final List<Field> fieldsWithoutId;
 
     public EntityClassMetaDataImpl(Class<T> clazz) {
         this.clazz = clazz;
+        this.constructor = initFullConstructor();
+        this.idField = initIdField();
+        this.allFields = initAllFields();
+        this.fieldsWithoutId = initFieldsWithoutId();
+    }
+
+    private Constructor<T> initFullConstructor() {
+        for (Constructor constructor : clazz.getDeclaredConstructors()) {
+            if (constructor.isAnnotationPresent(InitEntity.class)) {
+                return constructor;
+            }
+        }
+        throw new NotFoundInitConstructorException(
+                String.format(
+                        "В классе - %s, отсутствует конструктор дли инициализации(отсутсвует аннотация - %s)!",
+                        clazz.getSimpleName(), InitEntity.class.getSimpleName()
+                )
+        );
+    }
+
+    private Field initIdField() {
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(Id.class)) {
+                return field;
+            }
+        }
+        throw new NotFoundIdFieldException("Отсутствует поле помеченное как идентификатор для БД");
+    }
+
+
+    private List<Field> initAllFields() {
+        return Arrays.asList(clazz.getDeclaredFields());
+    }
+
+    private List<Field> initFieldsWithoutId() {
+        List<Field> resultFields = new ArrayList<>();
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(Id.class)) {
+                continue;
+            }
+            resultFields.add(field);
+        }
+        return resultFields;
     }
 
     @Override
@@ -27,43 +76,21 @@ public class EntityClassMetaDataImpl<T> implements EntityClassMetaData<T> {
 
     @Override
     public Constructor<T> getConstructor() {
-        List<Field> fields = getAllFields();
-        for (Constructor constructor : clazz.getDeclaredConstructors()) {
-            if (fields.size() == constructor.getParameterCount()) {
-                return constructor;
-            }
-        }
-        throw new UnsupportedOperationException();
+        return constructor;
     }
 
     @Override
     public Field getIdField() {
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            Annotation annotation = field.getAnnotation(Id.class); // todo exception если несколько полей помечено этим методом
-            if (annotation != null) {
-                return field;
-            }
-        }
-        throw new UnsupportedOperationException("Отсутствует поле помеченное как идентификатор для БД");
+        return idField;
     }
 
     @Override
     public List<Field> getAllFields() {
-        return Arrays.asList(clazz.getDeclaredFields());
+        return allFields;
     }
 
     @Override
     public List<Field> getFieldsWithoutId() {
-        List<Field> resultFields = new ArrayList<>();
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            Annotation annotation = field.getAnnotation(Id.class);
-            if (annotation != null) {
-                continue;
-            }
-            resultFields.add(field);
-        }
-        return resultFields;
+        return fieldsWithoutId;
     }
 }
