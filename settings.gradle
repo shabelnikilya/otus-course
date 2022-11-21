@@ -5,3 +5,6 @@ include 'hw06-test'
 include 'hw08-gc'
 include 'hw10-logging'
 include 'hw16-io'
+include 'hw12-solid'
+include 'hw15-patterns'
+
