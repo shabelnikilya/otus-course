@@ -1,4 +1,3 @@
-
 create table if not exists address(
     id bigint not null primary key,
     street varchar(100)
