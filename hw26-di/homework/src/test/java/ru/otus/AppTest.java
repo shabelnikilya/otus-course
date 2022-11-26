@@ -8,6 +8,7 @@ import ru.otus.appcontainer.AppComponentsContainerImpl;
 import ru.otus.appcontainer.api.AppComponent;
 import ru.otus.appcontainer.api.AppComponentsContainerConfig;
 import ru.otus.config.AppConfig;
+import ru.otus.config.AppTestConfig;
 import ru.otus.services.*;
 
 import java.io.PrintStream;
@@ -40,7 +41,7 @@ class AppTest {
             "equationPreparer, ru.otus.services.EquationPreparer"
     })
     public void shouldExtractFromContextCorrectComponentWithNotNullFields(String classNameOrBeanId, Class<?> rootClass) throws Exception {
-        var ctx = new AppComponentsContainerImpl(AppConfig.class);
+        var ctx = new AppComponentsContainerImpl("ru.otus.config");
 
         assertThat(classNameOrBeanId).isNotEmpty();
         Object component;

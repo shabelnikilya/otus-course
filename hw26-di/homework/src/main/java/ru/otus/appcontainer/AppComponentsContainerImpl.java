@@ -1,12 +1,10 @@
 package ru.otus.appcontainer;
 
+import org.reflections.Reflections;
 import ru.otus.appcontainer.api.AppComponent;
 import ru.otus.appcontainer.api.AppComponentsContainer;
 import ru.otus.appcontainer.api.AppComponentsContainerConfig;
-import ru.otus.appcontainer.exceptions.DuplicateComponentException;
-import ru.otus.appcontainer.exceptions.InterfacesImplementationException;
-import ru.otus.appcontainer.exceptions.MissingComponentInContainerException;
-import ru.otus.appcontainer.exceptions.TypeComponentException;
+import ru.otus.appcontainer.exceptions.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -16,52 +14,73 @@ import java.util.stream.Collectors;
 
 public class AppComponentsContainerImpl implements AppComponentsContainer {
 
-    private final Class<AppComponent> appComponentClass = AppComponent.class;
+    private final Class<AppComponent> componentAnnotation = AppComponent.class;
+    private final Class<AppComponentsContainerConfig> containerAnnotation = AppComponentsContainerConfig.class;
     private final List<Object> appComponents = new ArrayList<>();
     private final Map<String, Object> appComponentsByName = new HashMap<>();
 
-    public AppComponentsContainerImpl(Class<?> initialConfigClass) {
-        processConfig(initialConfigClass);
+    public AppComponentsContainerImpl(Class<?> configClass) {
+        processConfig(configClass);
     }
 
-    private void processConfig(Class<?> configClass) {
-        Object configObject = getConfigObject(configClass);
-        checkConfigClass(configClass);
-        List<Method> allMethodsFromClass = Arrays.asList(configClass.getDeclaredMethods());
-        List<Method> componentMethod = initComponentMethod(allMethodsFromClass);
-        for (Method m : componentMethod) {
-            try {
-                Parameter[] parameters = m.getParameters();
-                if (parameters.length == 0) {
-                    addComponentToContainer(configObject, m);
-                } else {
-                    int index = 0;
-                    Object[] args = new Object[parameters.length];
-                    for (Parameter parameter : parameters) {
-                        for (Object object : appComponents) {
-                            if (object.getClass().equals(parameter.getType())) {
-                                args[index++] = object;
-                                break;
-                            }
-                            Class<?>[] objectInterfaces = object.getClass().getInterfaces();
-                            Class<?>[] oInterfaces;
-                            Class<?> parameterType = parameter.getType();
-                            if (parameterType.isInterface()) {
-                                oInterfaces = new Class[] { parameterType };
-                            } else {
-                                oInterfaces = parameter.getClass().getInterfaces();
-                            }
-                            validateOnlyOneInterface(objectInterfaces, oInterfaces);
-                            if (objectInterfaces[0].equals(oInterfaces[0])) {
-                                args[index++] = object;
-                                break;
+    public AppComponentsContainerImpl(Class<?>... initialConfigClasses) {
+        processConfig(initialConfigClasses);
+    }
+
+    public AppComponentsContainerImpl(String packagePath) {
+        Reflections reflections = new Reflections(packagePath);
+        Set<Class<?>> containerClasses = reflections.getTypesAnnotatedWith(containerAnnotation).stream()
+                .filter(clazz -> clazz.isAnnotationPresent(containerAnnotation))
+                .sorted((clazz1, clazz2) -> Integer.compare(
+                                clazz1.getAnnotation(containerAnnotation).order(),
+                                clazz2.getAnnotation(containerAnnotation).order()
+                        )
+                )
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        containerClasses.forEach(this::processConfig);
+    }
+
+    private void processConfig(Class<?>... configClasses) {
+        for (Class<?> configClass : configClasses) {
+            checkConfigClass(configClass);
+            Object componentObject = createComponentObject(configClass);
+            List<Method> allMethodsFromClass = Arrays.asList(configClass.getDeclaredMethods());
+            List<Method> componentMethod = getComponentMethod(allMethodsFromClass);
+            for (Method m : componentMethod) {
+                try {
+                    Parameter[] parameters = m.getParameters();
+                    if (parameters.length == 0) {
+                        addComponentToContainer(componentObject, m);
+                    } else {
+                        int index = 0;
+                        Object[] args = new Object[parameters.length];
+                        for (Parameter parameter : parameters) {
+                            for (Object object : appComponents) {
+                                if (object.getClass().equals(parameter.getType())) {
+                                    args[index++] = object;
+                                    break;
+                                }
+                                Class<?>[] objectInterfaces = object.getClass().getInterfaces();
+                                Class<?>[] oInterfaces;
+                                Class<?> parameterType = parameter.getType();
+                                if (parameterType.isInterface()) {
+                                    oInterfaces = new Class[] { parameterType };
+                                } else {
+                                    oInterfaces = parameter.getClass().getInterfaces();
+                                }
+                                validateOnlyOneInterface(objectInterfaces, oInterfaces);
+                                if (objectInterfaces[0].equals(oInterfaces[0])) {
+                                    args[index++] = object;
+                                    break;
+                                }
                             }
                         }
+                        addComponentToContainer(componentObject, m, args);
                     }
-                    addComponentToContainer(configObject, m, args);
+                } catch (Exception e) {
+                    throw new ProcessConfigException("Ошибка при конфигурирования контейнера!", e);
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
         }
     }
@@ -72,11 +91,10 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
         }
     }
 
-    private void addComponentToContainer(Object configObject, Method m, Object... args) throws IllegalAccessException, InvocationTargetException {
-        Object o;
-        o = m.invoke(configObject, args);
-        appComponents.add(o);
-        appComponentsByName.put(m.getAnnotation(appComponentClass).name(), o);
+    private void addComponentToContainer(Object componentObject, Method method, Object... args) throws IllegalAccessException, InvocationTargetException {
+        Object object = method.invoke(componentObject, args);
+        appComponents.add(object);
+        appComponentsByName.put(method.getAnnotation(componentAnnotation).name(), object);
     }
 
     private void validateOnlyOneInterface(Class<?>[] objectInterfaces, Class<?>[] oInterfaces) {
@@ -86,21 +104,21 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
         }
     }
 
-    private List<Method> initComponentMethod(List<Method> allMethodsFromClass) {
+    private List<Method> getComponentMethod(List<Method> allMethodsFromClass) {
         Set<String> namesValidate = new HashSet<>();
         return allMethodsFromClass.stream()
-                .filter(m -> m.isAnnotationPresent(appComponentClass))
+                .filter(m -> m.isAnnotationPresent(componentAnnotation))
                 .peek(m -> {
-                    String nameComponent = m.getAnnotation(appComponentClass).name();
+                    String nameComponent = m.getAnnotation(componentAnnotation).name();
                     if (!namesValidate.add(nameComponent)) {
                         throw new DuplicateComponentException("В контейнере не может быть двух компонентов с одинаковым именем: " + nameComponent);
                     }
                 })
-                .sorted((m1, m2) -> Integer.compare(m1.getAnnotation(appComponentClass).order(), m2.getAnnotation(appComponentClass).order()))
+                .sorted((m1, m2) -> Integer.compare(m1.getAnnotation(componentAnnotation).order(), m2.getAnnotation(componentAnnotation).order()))
                 .collect(Collectors.toList());
     }
 
-    private Object getConfigObject(Class<?> configClass) {
+    private Object createComponentObject(Class<?> configClass) {
         Object configObject;
         try {
             configObject = configClass.newInstance();
