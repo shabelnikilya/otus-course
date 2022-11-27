@@ -46,10 +46,10 @@ public class DbServiceDemo {
         cacheTime.start();
         List<Client> clientFromCache = getClients(dbServiceClient, 50);
         cacheTime.stop();
-        long cachDeltTime = cacheTime.getTime();
-        log.info("Время за которое были получены клиенты с использование кэша, ms: {}", cachDeltTime);
+        long cacheDeltaTime = cacheTime.getTime();
+        log.info("Время за которое были получены клиенты с использование кэша, ms: {}", cacheDeltaTime);
 
-        log.info("Разница между кэшом и без кэша, ms: {}", notCacheDeltaTime - cachDeltTime);
+        log.info("Разница между кэшом и без кэша, ms: {}", notCacheDeltaTime - cacheDeltaTime);
 
         /*
         Очистка кэша
