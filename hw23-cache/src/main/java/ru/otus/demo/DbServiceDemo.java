@@ -16,6 +16,7 @@ import ru.otus.crm.service.DbServiceClientImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DbServiceDemo {
 
@@ -26,36 +27,20 @@ public class DbServiceDemo {
 
     public static void main(String[] args) {
         var configuration = new Configuration().configure(HIBERNATE_CFG_FILE);
-
-        var dbUrl = configuration.getProperty("hibernate.connection.url");
-        var dbUserName = configuration.getProperty("hibernate.connection.username");
-        var dbPassword = configuration.getProperty("hibernate.connection.password");
-
-        new MigrationsExecutorFlyway(dbUrl, dbUserName, dbPassword).executeMigrations();
-
+        executeScript(configuration);
         var sessionFactory = HibernateUtils.buildSessionFactory(configuration, Client.class, Address.class, Phone.class);
-
         var transactionManager = new TransactionManagerHibernate(sessionFactory);
-///
         var clientTemplate = new DataTemplateHibernate<>(Client.class);
-///
         var dbServiceClient = new DbServiceClientImpl(transactionManager, clientTemplate);
 
         saveClients(dbServiceClient, 100);
 
-        /*
-        Замер скорости получения клиентов без кеширования
-         */
         StopWatch withoutCacheTime = new StopWatch();
         withoutCacheTime.start();
         List<Client> clientsFromDb = getClients(dbServiceClient, 50);
         withoutCacheTime.stop();
         long notCacheDeltaTime = withoutCacheTime.getTime();
-        log.info("Время за которое были получены 100 клиентов без кэша, ms: {}", notCacheDeltaTime);
-
-        /*
-        Предварительный запрос клиентов и кэширование
-         */
+        log.info("Время за которое были получены клиентов без кэша, ms: {}", notCacheDeltaTime);
 
         StopWatch cacheTime = new StopWatch();
         cacheTime.start();
@@ -80,11 +65,19 @@ public class DbServiceDemo {
         log.info("Время за которое были получены клиенты после очистки, ms: {}", afterGcDeltaTime);
     }
 
+    private static void executeScript(Configuration configuration) {
+        var dbUrl = configuration.getProperty("hibernate.connection.url");
+        var dbUserName = configuration.getProperty("hibernate.connection.username");
+        var dbPassword = configuration.getProperty("hibernate.connection.password");
+
+        new MigrationsExecutorFlyway(dbUrl, dbUserName, dbPassword).executeMigrations();
+    }
+
     private static List<Client> getClients(DBServiceClient dbServiceClient, int limit) {
         return INIT_IDS.stream()
                 .limit(limit)
                 .map(id -> dbServiceClient.getClient(id).get())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private static void saveClients(DbServiceClientImpl dbServiceClient, int amount) {
