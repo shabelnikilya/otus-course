@@ -18,18 +18,14 @@ import server.ClientsWebServerImpl;
 import services.TemplateProcessor;
 import services.TemplateProcessorImpl;
 
-
 public class WebServerWithBasicSecurity {
     public static final String HIBERNATE_CFG_FILE = "hibernate.cfg.xml";
-
     private static final int WEB_SERVER_PORT = 8080;
     private static final String TEMPLATES_DIR = "/templates/";
     private static final String HASH_LOGIN_SERVICE_CONFIG_NAME = "realm.properties";
     private static final String REALM_NAME = "AnyRealm";
 
     public static void main(String[] args) throws Exception {
-
-
         DBServiceClient dbServiceClient = configurationDBServiceClient();
 
         Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();

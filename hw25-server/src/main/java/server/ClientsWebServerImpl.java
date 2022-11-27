@@ -23,9 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 
 
-/**
- * @author Shabelnik Ilya (ishabelnik@unislabs.com)
- */
 public class ClientsWebServerImpl implements ClientsWebServer {
 
     private static final String START_PAGE_NAME = "index.html";
@@ -68,18 +65,17 @@ public class ClientsWebServerImpl implements ClientsWebServer {
         server.stop();
     }
 
-    private Server initContext() {
+    private void initContext() {
 
         ResourceHandler resourceHandler = createResourceHandler();
         ServletContextHandler servletContextHandler = createServletContextHandler();
 
         HandlerList handlers = new HandlerList();
         handlers.addHandler(resourceHandler);
-        handlers.addHandler(applySecurity(servletContextHandler, "/users", "/api/user/*"));
+        handlers.addHandler(applySecurity(servletContextHandler, "/clients", "/api/clients/*"));
 
 
         server.setHandler(handlers);
-        return server;
     }
 
     private Handler applySecurity(ServletContextHandler servletContextHandler, String... paths) {

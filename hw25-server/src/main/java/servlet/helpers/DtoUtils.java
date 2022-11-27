@@ -7,9 +7,6 @@ import dto.ClientDto;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @author Shabelnik Ilya (ishabelnik@unislabs.com)
- */
 public final class DtoUtils {
 
     private DtoUtils() {

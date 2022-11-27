@@ -45,7 +45,6 @@ public class ClientsServlet extends HttpServlet {
         List<ClientDto> clients = dbServiceClient.findAll().stream()
                 .map(DtoUtils::toDto)
                 .collect(Collectors.toList());;
-
         paramsMap.put(TEMPLATE_CLIENTS, clients);
 
         response.setContentType("text/html");
@@ -56,7 +55,6 @@ public class ClientsServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Map<String, String[]> parameters = req.getParameterMap();
         Client client = createClientFromForm(parameters);
-
         dbServiceClient.saveClient(client);
 
         resp.sendRedirect("/" + TEMPLATE_CLIENTS);
