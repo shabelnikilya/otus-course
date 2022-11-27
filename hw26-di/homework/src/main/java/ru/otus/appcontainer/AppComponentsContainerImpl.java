@@ -29,14 +29,17 @@ public class AppComponentsContainerImpl implements AppComponentsContainer {
 
     public AppComponentsContainerImpl(String packagePath) {
         Reflections reflections = new Reflections(packagePath);
-        Set<Class<?>> containerClasses = reflections.getTypesAnnotatedWith(containerAnnotation).stream()
+        List<Class<?>> containerClasses = reflections.getTypesAnnotatedWith(containerAnnotation).stream()
                 .filter(clazz -> clazz.isAnnotationPresent(containerAnnotation))
                 .sorted((clazz1, clazz2) -> Integer.compare(
                                 clazz1.getAnnotation(containerAnnotation).order(),
                                 clazz2.getAnnotation(containerAnnotation).order()
                         )
                 )
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                .collect(Collectors.toList());
+        if (containerClasses.isEmpty()) {
+            throw new ConfigClassNotFoundException("Не найдено ни одного конфигурационного файла для компонентов!");
+        }
 
         containerClasses.forEach(this::processConfig);
     }
