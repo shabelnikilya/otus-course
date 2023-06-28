@@ -10,3 +10,5 @@ include 'hw12-solid'
 include 'hw15-patterns'
 include 'hw18-jdbc:demo'
 include 'hw18-jdbc:homework'
+include 'hw26-di:homework'
+
